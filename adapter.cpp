@@ -6,7 +6,7 @@ Adapter::Adapter(QWidget *parent) :
     ui(new Ui::Adapter)
 {
     ui->setupUi(this);
-    device = new Device();
+    device = Device::instance();
 
     QStandardItem *item = new QStandardItem("Network Adapter");
     QStandardItemModel *adapterModel = new QStandardItemModel();

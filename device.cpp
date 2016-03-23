@@ -104,6 +104,29 @@ bool Device::hasName(QString name)
     return false;
 }
 
+pcap_if_t* Device::getPacpIfTByName(QString name)
+{
+    pcap_if_t *d;
+    for(d = head; d != NULL; d= d->next)
+    {
+        if (d->name == name) {
+            break;
+        }
+    }
+    return d;
+}
+
+Device* Device::instance()
+{
+    if (device == NULL)
+    {
+        return new Device();
+    }
+    return device;
+}
+
+Device* Device::device = NULL;
+
 /* From tcptraceroute, convert a numeric IP address to a string */
 #define IPTOSBUFFERS    12
 char* Device::iptos(u_long in)
