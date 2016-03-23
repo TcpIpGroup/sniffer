@@ -24,7 +24,6 @@ HEADERS  += sniffer.h \
     device.h
 
 FORMS    += sniffer.ui \
-    dialog.ui \
     adapter.ui
 RESOURCES += \
     images.qrc
