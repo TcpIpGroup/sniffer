@@ -11,13 +11,20 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = sniffer
 TEMPLATE = app
 
+LIBS += -llibwpcap\
+    -lws2_32
 
 SOURCES += main.cpp\
-        sniffer.cpp
+        sniffer.cpp \
+    adapter.cpp \
+    device.cpp
 
-HEADERS  += sniffer.h
+HEADERS  += sniffer.h \
+    adapter.h \
+    device.h
 
 FORMS    += sniffer.ui \
-    dialog.ui
+    dialog.ui \
+    adapter.ui
 RESOURCES += \
     images.qrc

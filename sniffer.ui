@@ -44,7 +44,7 @@
     <property name="title">
      <string>适配器</string>
     </property>
-    <addaction name="action_7"/>
+    <addaction name="actionSelectAdapter"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -146,7 +146,7 @@
     <string>停止抓包</string>
    </property>
   </action>
-  <action name="action_7">
+  <action name="actionSelectAdapter">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/file/images/3.png</normaloff>:/file/images/3.png</iconset>

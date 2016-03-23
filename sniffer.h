@@ -2,7 +2,7 @@
 #define SNIFFER_H
 
 #include <QMainWindow>
-
+#include <adapter.h>
 #define HAVE_REMOTE
 #include <pcap.h>
 #include <remote-ext.h>
@@ -19,6 +19,9 @@ public:
     explicit Sniffer(QWidget *parent = 0);
     ~Sniffer();
 
+private slots:
+    void on_actionSelectAdapter_triggered();
+    void on_adapter_itemClicked(const QString &name);
 private:
     Ui::Sniffer *ui;
 };
