@@ -16,9 +16,10 @@ Adapter::Adapter(QWidget *parent) :
     if (!device->isError())
     {
         QList<QStandardItem *> adapterItems;
-        for(QString name : device->getNameList())
+        QStringList nameList = device->getNameList();
+        for(QStringList::const_iterator it = nameList.begin(); it != nameList.end(); ++it)
         {
-            adapterItems.push_back(new QStandardItem(name));
+            adapterItems.push_back(new QStandardItem(*it));
         }
         item->appendRows(adapterItems);
     }
