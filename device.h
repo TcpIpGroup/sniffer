@@ -62,6 +62,14 @@ public:
      * @return
      */
     static Device* instance();
+    /**
+     * @brief 释放设备列表
+     */
+    void free();
+    /**
+     * @brief 或者设备列表头指针
+     */
+    Device* getHead(Device *device);
 private:
     static Device *device;
     bool error = false;

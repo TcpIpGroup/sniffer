@@ -2,17 +2,30 @@
 
 Device::Device()
 {
-    char errbuf[PCAP_ERRBUF_SIZE];
-
-    /* Retrieve the device list from the local machine */
-    if (pcap_findalldevs_ex(PCAP_SRC_IF_STRING, NULL /* auth is not needed */, &head, errbuf) == -1)
-    {
-        error = true;
-        QMessageBox::warning(NULL, "获取设备失败", errbuf);
-    }
+    getHead(this);
 }
 
 Device::~Device()
+{
+    free();
+}
+
+Device* Device::getHead(Device *device)
+{
+    if (!device->isError()) {
+        char errbuf[PCAP_ERRBUF_SIZE];
+
+        /* Retrieve the device list from the local machine */
+        if (pcap_findalldevs_ex(PCAP_SRC_IF_STRING, NULL /* auth is not needed */, &head, errbuf) == -1)
+        {
+            error = true;
+            QMessageBox::warning(NULL, "获取设备失败", errbuf);
+        }
+    }
+    return this;
+}
+
+void Device::free()
 {
     if (head) {
         pcap_freealldevs(head);

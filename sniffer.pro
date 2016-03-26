@@ -21,7 +21,8 @@ SOURCES += main.cpp\
 
 HEADERS  += sniffer.h \
     adapter.h \
-    device.h
+    device.h \
+    pro.h
 
 FORMS    += sniffer.ui \
     adapter.ui
