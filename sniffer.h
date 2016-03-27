@@ -2,6 +2,9 @@
 #define SNIFFER_H
 
 #include <QMainWindow>
+#include <QThread>
+#include <QScrollBar>
+
 #include <adapter.h>
 #define HAVE_REMOTE
 #include <pcap.h>
@@ -19,20 +22,34 @@ class Sniffer : public QMainWindow
 public:
     explicit Sniffer(QWidget *parent = 0);
     ~Sniffer();
-    static Ui::Sniffer *uiHander;
 
 private slots:
     void on_actionSelectAdapter_triggered();
-    void on_action_triggered();
+    void on_actionStart_triggered();
+    void on_actionPause_triggered();
+    void on_actionHelp_triggered();
+    void on_actionExit_triggered();
+
     void on_adapter_itemClicked(const QString &name);
-    void on_action_start_triggered();
-    void on_action_help_triggered();
-    void on_action_start_2_triggered();
+
+public slots:
+    /**
+     * @brief 处理数据包信号的槽
+     * @param header
+     * @param packageData
+     */
+    void on_package(const struct pcap_pkthdr *header, const u_char *packageData);
+
 private:
     Ui::Sniffer *ui;
-    pcap_t *adhandle;
-    struct pcap_pkthdr *header;
-    int ischooseed = 0;
+    PackageObject *packageObject;
+
+private:
+    void setHelpEnabled(bool enabled);
+    void setPauseEnabled(bool enabled);
+    void setStartEnabled(bool enabled);
+    void setTableViewHeader();
+
 };
 
 #endif // SNIFFER_H

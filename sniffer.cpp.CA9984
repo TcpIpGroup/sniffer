@@ -7,6 +7,7 @@ Sniffer::Sniffer(QWidget *parent) :
     ui(new Ui::Sniffer)
 {
     ui->setupUi(this);
+    uiHander = ui;
 
     connect(ui->actionMenuSelectAdapter, SIGNAL(triggered()), this, SLOT(on_actionSelectAdapter_triggered()));
     connect(ui->actionMenuStart, SIGNAL(triggered()), this, SLOT(on_actionStart_triggered()));
@@ -18,10 +19,9 @@ Sniffer::Sniffer(QWidget *parent) :
     setStartEnabled(false);
 
     setTableViewHeader();
-
-    packageObject = new PackageObject();
-    connect(packageObject, SIGNAL(package(const pcap_pkthdr*,const u_char*)), this, SLOT(on_package(const pcap_pkthdr*,const u_char*)));
 }
+
+Ui::Sniffer *Sniffer::uiHander = NULL;
 
 Sniffer::~Sniffer()
 {
@@ -40,19 +40,14 @@ void Sniffer::on_actionSelectAdapter_triggered()
 
 void Sniffer::on_actionStart_triggered()
 {
-    ui->tableViewPackage->horizontalHeader()->show();
+    ui->tableViewPakage->horizontalHeader()->show();
     setStartEnabled(false);
     setPauseEnabled(true);
-    QStandardItemModel *model = (QStandardItemModel *)(ui->tableViewPackage->model());
-    model->removeRows(0, model->rowCount());
-    packageObject->start();
 }
 
 void Sniffer::on_actionPause_triggered()
 {
-    packageObject->stop();
-    setStartEnabled(true);
-    setPauseEnabled(false);
+
 }
 
 void Sniffer::on_actionHelp_triggered()
@@ -65,18 +60,14 @@ void Sniffer::on_actionExit_triggered()
     this->close();
 }
 
-void Sniffer::on_adapter_itemClicked(const QString &name)
+/* 每次捕获到数据包时，libpcap都会自动调用这个回调函数 */
+void Sniffer::packet_handler(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data)
 {
-    statusBar()->showMessage(tr("已选择设备: ") + Device::instance()->getDescriptionByName(name));
-    packageObject->setDeviceName(name);
-    this->setStartEnabled(true);
-}
-
-void Sniffer::on_package(const pcap_pkthdr *header, const u_char *packageData)
-{
+    QStandardItemModel *model = (QStandardItemModel*)Sniffer::uiHander->tableViewPackge->model();
     struct tm *ltime;
     char timestr[16];
     time_t local_tv_sec;
+
 
     /* 将时间戳转换成可识别的格式 */
     local_tv_sec = header->ts.tv_sec;
@@ -88,8 +79,28 @@ void Sniffer::on_package(const pcap_pkthdr *header, const u_char *packageData)
     QStandardItem *item3=new QStandardItem(QString::number(header->len));
     QList<QStandardItem*> item;
     item<<item1<<item2<<item3;
-    qDebug()<<"Sniffer:"<<QThread::currentThreadId();
-    ((QStandardItemModel *)(ui->tableViewPackage->model()))->appendRow(item);
+    model->appendRow(item);
+}
+
+void Sniffer::on_adapter_itemClicked(const QString &name)
+{
+    statusBar()->showMessage(tr("已选择设备: ") + Device::instance()->getDescriptionByName(name));
+    char errbuf[PCAP_ERRBUF_SIZE];
+    const char *dname= name.toStdString().c_str();
+    //打开设备
+    if ( (adhandle= pcap_open(dname,          // 设备名
+                              65536,            // 65535保证能捕获到不同数据链路层上的每个数据包的全部内容
+                              PCAP_OPENFLAG_PROMISCUOUS,    // 混杂模式
+                              1000,             // 读取超时时间
+                              NULL,             // 远程机器验证
+                              errbuf            // 错误缓冲池
+                              )) == NULL)
+    {
+        QString errname = name;
+        QMessageBox::warning(NULL,"error","\nUnable to open the adapter. "+ errname +"is not supported by WinPcap\n");
+        return;
+    }
+    this->setStartEnabled(true);
 }
 
 void Sniffer::setHelpEnabled(bool enabled)
@@ -118,13 +129,13 @@ void Sniffer::setTableViewHeader()
     QStringList headerList;
     headerList << "time" << "usec" << "head";
     model->setHorizontalHeaderLabels(headerList);
-    ui->tableViewPackage->horizontalHeader()->setStretchLastSection(true);
-    ui->tableViewPackage->setModel(model);
-    ui->tableViewPackage->verticalHeader()->hide();
-    ui->tableViewPackage->horizontalHeader()->hide();
+    ui->tableViewPackge->horizontalHeader()->setStretchLastSection(true);
+    ui->tableViewPackge->setModel(model);
+    ui->tableViewPackge->verticalHeader()->hide();
+    ui->tableViewPackge->horizontalHeader()->hide();
 
     //设置选中时为整行选中
-    ui->tableViewPackage->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tableViewPackge->setSelectionBehavior(QAbstractItemView::SelectRows);
     //设置表格的单元为只读属性，即不能编辑
-    ui->tableViewPackage->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableViewPackge->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }

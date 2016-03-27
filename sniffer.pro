@@ -17,14 +17,17 @@ LIBS += -llibwpcap\
 SOURCES += main.cpp\
         sniffer.cpp \
     adapter.cpp \
-    device.cpp
+    device.cpp \
+    packageobject.cpp
 
 HEADERS  += sniffer.h \
     adapter.h \
     device.h \
-    pro.h
+    pro.h \
+    packageobject.h
 
 FORMS    += sniffer.ui \
     adapter.ui
 RESOURCES += \
-    images.qrc
+    images.qrc \
+    qdarkstyle/style.qrc

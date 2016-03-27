@@ -28,6 +28,7 @@ Adapter::Adapter(QWidget *parent) :
     //hide the treeView's header
     ui->treeViewAdapter->setHeaderHidden(true);
     ui->treeViewAdapter->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->treeViewAdapter->expandAll();
 
 
     //
@@ -49,7 +50,7 @@ void Adapter::on_treeViewAdapter_clicked(const QModelIndex &index)
     model->removeRows(0, model->rowCount());
     if (!(QStandardItemModel *)index.model()->hasChildren(index))
     {
-        QMap<QString, QString> map = device->getDescriptionByName(index.data().toString());
+        QMap<QString, QString> map = device->getDetailsByName(index.data().toString());
         for (QMap<QString, QString>::Iterator it = map.begin(); it != map.end(); ++it)
         {
             QList<QStandardItem *> list;

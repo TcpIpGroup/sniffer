@@ -2,7 +2,7 @@
 
 Device::Device()
 {
-    getHead(this);
+    setHead();
 }
 
 Device::~Device()
@@ -10,19 +10,21 @@ Device::~Device()
     free();
 }
 
-Device* Device::getHead(Device *device)
+void Device::setHead()
 {
-    if (!device->isError()) {
-        char errbuf[PCAP_ERRBUF_SIZE];
-
-        /* Retrieve the device list from the local machine */
-        if (pcap_findalldevs_ex(PCAP_SRC_IF_STRING, NULL /* auth is not needed */, &head, errbuf) == -1)
+    if (!isError())
+    {
+        if (head == NULL)
         {
-            error = true;
-            QMessageBox::warning(NULL, "获取设备失败", errbuf);
+            char errbuf[PCAP_ERRBUF_SIZE];
+            /* Retrieve the device list from the local machine */
+            if (pcap_findalldevs_ex(PCAP_SRC_IF_STRING, NULL /* auth is not needed */, &head, errbuf) == -1)
+            {
+                error = true;
+                QMessageBox::warning(NULL, "获取设备失败", errbuf);
+            }
         }
     }
-    return this;
 }
 
 void Device::free()
@@ -48,7 +50,7 @@ QStringList Device::getNameList()
     return list;
 }
 
-QMap<QString, QString> Device::getDescriptionByName(QString name)
+QMap<QString, QString> Device::getDetailsByName(const QString &name)
 {
     QMap<QString, QString> map;
     pcap_if_t *d;
@@ -105,7 +107,7 @@ QMap<QString, QString> Device::getDescriptionByName(QString name)
     return map;
 }
 
-bool Device::hasName(QString name)
+bool Device::hasName(const QString &name)
 {
     pcap_if_t *d;
     for(d = head; d != NULL; d= d->next)
@@ -117,7 +119,7 @@ bool Device::hasName(QString name)
     return false;
 }
 
-pcap_if_t* Device::getPacpIfTByName(QString name)
+QString Device::getDescriptionByName(const QString &name)
 {
     pcap_if_t *d;
     for(d = head; d != NULL; d= d->next)
@@ -126,14 +128,37 @@ pcap_if_t* Device::getPacpIfTByName(QString name)
             break;
         }
     }
-    return d;
+    if (d->description)
+    {
+        return d->description;
+    }
+    return name;
+}
+
+pcap_t* Device::getHandleByName(const QString &name)
+{
+    pcap_t* handle = NULL;
+    char errbuf[PCAP_ERRBUF_SIZE];
+    //打开设备
+    if ((handle = pcap_open(name.toStdString().c_str(),          // 设备名
+                              65536,            // 65535保证能捕获到不同数据链路层上的每个数据包的全部内容
+                              PCAP_OPENFLAG_PROMISCUOUS,    // 混杂模式
+                              1000,             // 读取超时时间
+                              NULL,             // 远程机器验证
+                              errbuf            // 错误缓冲池
+                              )) == NULL)
+    {
+        QString errname = name;
+        QMessageBox::warning(NULL,"error","\nUnable to open the adapter. "+ errname +"is not supported by WinPcap\n");
+    }
+    return handle;
 }
 
 Device* Device::instance()
 {
     if (device == NULL)
     {
-        return new Device();
+        device = new Device();
     }
     return device;
 }

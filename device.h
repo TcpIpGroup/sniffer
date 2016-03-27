@@ -4,6 +4,8 @@
 #include <QMessageBox>
 #include <QMap>
 #include <QStringList>
+#include <QObject>
+#include <QDebug>
 
 #define HAVE_REMOTE
 #include <pcap.h>
@@ -17,8 +19,13 @@
     #include<ws2tcpip.h>
 #endif
 
-class Device
+#include <packageobject.h>
+class PackageObject;
+
+class Device: public QObject
 {
+    Q_OBJECT
+
 private:
     Device();
     ~Device();
@@ -41,21 +48,21 @@ public:
      * @param name
      * @return
      */
-    QMap<QString, QString> getDescriptionByName(QString name);
+    QMap<QString, QString> getDetailsByName(const QString &name);
 
     /**
      * @brief 判断是否存在改名字的设备
      * @param name
      * @return
      */
-    bool hasName(QString name);
+    bool hasName(const QString &name);
 
     /**
-     * @brief 根据设备名字获取设备指针
+     * @brief 根据设备名字获取设备的描述
      * @param name
      * @return
      */
-    pcap_if_t* getPacpIfTByName(QString name);
+    QString getDescriptionByName(const QString &name);
 
     /**
      * @brief 实例化Device类
@@ -67,9 +74,16 @@ public:
      */
     void free();
     /**
-     * @brief 或者设备列表头指针
+     * @brief 设置设备列表头指针
      */
-    Device* getHead(Device *device);
+    void setHead();
+
+    /**
+     * @brief 获取设备句柄
+     * @param object
+     */
+    pcap_t* getHandleByName(const QString &name);
+
 private:
     static Device *device;
     bool error = false;
@@ -77,6 +91,7 @@ private:
 
     char* iptos(u_long in);
     char* ip6tos(struct sockaddr *sockaddr, char *address, int addrlen);
+
 };
 
 #endif // DEVICE_H
