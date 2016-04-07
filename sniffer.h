@@ -6,11 +6,14 @@
 #include <QScrollBar>
 
 #include <adapter.h>
+#include<winsock2.h>
 #define HAVE_REMOTE
 #include <pcap.h>
 #include <remote-ext.h>
 #include "device.h"
-
+#include "pro.h"
+#include "pktinfo.h"
+#include<vector>
 namespace Ui {
 class Sniffer;
 }
@@ -32,6 +35,8 @@ private slots:
 
     void on_adapter_itemClicked(const QString &name);
 
+    void on_tableViewPackage_clicked(const QModelIndex &index);
+
 public slots:
     /**
      * @brief 处理数据包信号的槽
@@ -43,12 +48,15 @@ public slots:
 private:
     Ui::Sniffer *ui;
     PackageObject *packageObject;
+    vector<pktinfo> vec;
+    int count;
 
 private:
     void setHelpEnabled(bool enabled);
     void setPauseEnabled(bool enabled);
     void setStartEnabled(bool enabled);
     void setTableViewHeader();
+    void setTreeViewHeader();
 
 };
 
