@@ -18,15 +18,13 @@ SOURCES += main.cpp\
         sniffer.cpp \
     adapter.cpp \
     device.cpp \
-    packageobject.cpp \
-    pktinfo.cpp
+    packageobject.cpp
 
 HEADERS  += sniffer.h \
     adapter.h \
     device.h \
     pro.h \
-    packageobject.h \
-    pktinfo.h
+    packageobject.h
 
 FORMS    += sniffer.ui \
     adapter.ui

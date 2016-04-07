@@ -18,10 +18,9 @@ Sniffer::Sniffer(QWidget *parent) :
     setStartEnabled(false);
 
     setTableViewHeader();
-    setTreeViewHeader();
+
     packageObject = new PackageObject();
     connect(packageObject, SIGNAL(package(const pcap_pkthdr*,const u_char*)), this, SLOT(on_package(const pcap_pkthdr*,const u_char*)));
-    count=0;
 }
 
 Sniffer::~Sniffer()
@@ -78,23 +77,17 @@ void Sniffer::on_package(const pcap_pkthdr *header, const u_char *packageData)
     struct tm *ltime;
     char timestr[16];
     time_t local_tv_sec;
-    pktinfo pkt(packageData);
-    this->vec.push_back(pkt);
-    count++;
+
     /* 将时间戳转换成可识别的格式 */
     local_tv_sec = header->ts.tv_sec;
     ltime=localtime(&local_tv_sec);
     strftime( timestr, sizeof timestr, "%H:%M:%S", ltime);
 
-    //ethhdr * p=(ethhdr *)packageData;
-    //u_short test=ntohs(p->type);
-    //qDebug()<<hex<<p->dest[0]<<":"<<p->dest[1]<<":"<<p->dest[2]<<":"<<p->dest[3]<<":"<<p->dest[4]<<":"<<p->dest[5];
-    QStandardItem *item0=new QStandardItem(QString::number(count));
     QStandardItem *item1=new QStandardItem(timestr);
     QStandardItem *item2=new QStandardItem(QString::number(header->ts.tv_usec));
     QStandardItem *item3=new QStandardItem(QString::number(header->len));
     QList<QStandardItem*> item;
-    item<<item0<<item1<<item2<<item3;
+    item<<item1<<item2<<item3;
     qDebug()<<"Sniffer:"<<QThread::currentThreadId();
     ((QStandardItemModel *)(ui->tableViewPackage->model()))->appendRow(item);
 }
@@ -123,7 +116,7 @@ void Sniffer::setTableViewHeader()
     QStandardItemModel *model = new QStandardItemModel();
     //列
     QStringList headerList;
-    headerList << "seq"<<"time" << "usec" << "head";
+    headerList << "time" << "usec" << "head";
     model->setHorizontalHeaderLabels(headerList);
     ui->tableViewPackage->horizontalHeader()->setStretchLastSection(true);
     ui->tableViewPackage->setModel(model);
@@ -135,44 +128,3 @@ void Sniffer::setTableViewHeader()
     //设置表格的单元为只读属性，即不能编辑
     ui->tableViewPackage->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
-
-void Sniffer::setTreeViewHeader()
-{
-    QStandardItemModel *model = new QStandardItemModel();
-    //列
-    QStringList headerList;
-    headerList << "content";
-    model->setHorizontalHeaderLabels(headerList);
-    //ui->treeView->horizontalHeader()->setStretchLastSection(true);
-    ui->treeView->setModel(model);
-    //u//i->treeView->verticalHeader()->hide();
-    //ui->treeView->horizontalHeader()->hide();
-}
-
-void Sniffer::on_tableViewPackage_clicked(const QModelIndex &index)
-{
-    QStandardItemModel *model = (QStandardItemModel *)ui->treeView->model();
-    model->removeRows(0, model->rowCount());
-
-    if (!(QStandardItemModel *)index.model()->hasChildren(index))
-    {
-            int num=index.data().toInt();
-            model->appendRow(new QStandardItem(QString::fromStdString(this->vec[num].ethinfo)));
-            if(this->vec[num].arpinfo!="")
-                 model->appendRow(new QStandardItem(QString::fromStdString(this->vec[num].arpinfo)));
-            if(this->vec[num].ipinfo!="")
-                 model->appendRow(new QStandardItem(QString::fromStdString(this->vec[num].ipinfo)));
-            if(this->vec[num].ipv6info!="")
-                 model->appendRow(new QStandardItem(QString::fromStdString(this->vec[num].ipv6info)));
-            if(this->vec[num].tcpinfo!="")
-                 model->appendRow(new QStandardItem(QString::fromStdString(this->vec[num].tcpinfo)));
-            if(this->vec[num].udpinfo!="")
-                 model->appendRow(new QStandardItem(QString::fromStdString(this->vec[num].udpinfo)));
-            if(this->vec[num].icmpinfo!="")
-                 model->appendRow(new QStandardItem(QString::fromStdString(this->vec[num].icmpinfo)));
-
-
-    }
-
-}
-
