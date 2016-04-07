@@ -5,6 +5,7 @@ PackageObject::PackageObject()
     connect(this, SIGNAL(capturePackage()), this, SLOT(on_capturePackage()));
     this->moveToThread(&thread);
     thread.start();
+    handle=NULL;
 }
 
 PackageObject::~PackageObject()

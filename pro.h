@@ -5,13 +5,13 @@
 #define PROTO_TCP 6
 #define PROTO_UDP 17
 #define LITTLE_ENDIAN 1234
-#define BIG_ENDIAN    4321
+#define BIG_ENDIAN    4231
 
-class Device
+/*class Device
 {
 private:
     Device();
-    ~Device();
+    ~Device();*/
     //Mac帧头 占14个字节
     struct ethhdr
     {
@@ -29,9 +29,9 @@ private:
         u_char ar_pln;                      //协议地址长度
         u_short ar_op;                      //操作码，1为请求 2为回复
         u_char ar_srcmac[6];            //发送方MAC
-        u_char ar_srcip[4];             //发送方IP
+        struct in_addr ar_srcip;             //发送方IP
         u_char ar_destmac[6];           //接收方MAC
-        u_char ar_destip[4];                //接收方IP
+        struct in_addr ar_destip;                //接收方IP
     };
 
     //定义IP头
@@ -51,8 +51,8 @@ private:
         u_char ttl;             //生存时间
         u_char proto;       //协议
         u_short check;      //校验和
-        u_int saddr;            //源地址
-        u_int daddr;            //目的地址
+        struct in_addr  saddr;            //源地址
+        struct in_addr  daddr;            //目的地址
         u_int   op_pad;     //选项等
     };
 
@@ -155,5 +155,5 @@ private:
         int n_other;
         int n_sum;
     };
-}
+/* }*/
 #endif
