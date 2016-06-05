@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Select Adapter</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
@@ -26,7 +26,7 @@
           </font>
          </property>
          <property name="text">
-          <string>选择适配器（双击）：</string>
+          <string>Select adapter(double click)</string>
          </property>
         </widget>
        </item>
@@ -41,7 +41,7 @@
           </font>
          </property>
          <property name="text">
-          <string>适配器描述：</string>
+          <string>Adapter description</string>
          </property>
         </widget>
        </item>

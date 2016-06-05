@@ -24,13 +24,12 @@ void PackageObject::on_capturePackage()
         /* Retrieve the packets */
         while ((res = pcap_next_ex(handle, &header, &packageData)) >= 0)
         {
-            qDebug() << res;
             if(res == 0)
             {    /* Timeout elapsed */
                 continue;
             }
-            qDebug()<<"PackageObject:"<<QThread::currentThreadId();
-            emit package(header, packageData);
+            //qDebug()<<"res"<<res;
+            emit ethernet_protocol_package(header, packageData);
         }
         if (res == -1)
         {

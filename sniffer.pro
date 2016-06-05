@@ -19,17 +19,38 @@ SOURCES += main.cpp\
     adapter.cpp \
     device.cpp \
     packageobject.cpp \
-    pktinfo.cpp
+    statistics.cpp \
+    arp.cpp \
+    ipv4.cpp \
+    ethernet.cpp \
+    protocol.cpp \
+    udp.cpp \
+    tcp.cpp \
+    icmp.cpp \
+    rarp.cpp \
+    dhcp.cpp \
+    count.cpp
 
 HEADERS  += sniffer.h \
     adapter.h \
     device.h \
-    pro.h \
     packageobject.h \
-    pktinfo.h
+    statistics.h \
+    arp.h \
+    ipv4.h \
+    ethernet.h \
+    protocolheader.h \
+    protocol.h \
+    udp.h \
+    tcp.h \
+    icmp.h \
+    rarp.h \
+    dhcp.h \
+    count.h
 
 FORMS    += sniffer.ui \
-    adapter.ui
+    adapter.ui \
+    count.ui
 RESOURCES += \
     images.qrc \
     qdarkstyle/style.qrc

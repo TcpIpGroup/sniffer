@@ -4,16 +4,17 @@
 #include <QMainWindow>
 #include <QThread>
 #include <QScrollBar>
-
-#include <adapter.h>
+#include "count.h"
+#include "adapter.h"
 #include<winsock2.h>
 #define HAVE_REMOTE
 #include <pcap.h>
 #include <remote-ext.h>
 #include "device.h"
-#include "pro.h"
-#include "pktinfo.h"
-#include<vector>
+#include "ethernet.h"
+#include <iostream>
+#include <vector>
+using namespace std;
 namespace Ui {
 class Sniffer;
 }
@@ -31,6 +32,7 @@ private slots:
     void on_actionStart_triggered();
     void on_actionPause_triggered();
     void on_actionHelp_triggered();
+    void on_actionView_triggered();
     void on_actionExit_triggered();
 
     void on_adapter_itemClicked(const QString &name);
@@ -43,12 +45,12 @@ public slots:
      * @param header
      * @param packageData
      */
-    void on_package(const struct pcap_pkthdr *header, const u_char *packageData);
+    void on_ethernet_protocol_package(const struct pcap_pkthdr *header, const u_char *packageData);
 
 private:
     Ui::Sniffer *ui;
     PackageObject *packageObject;
-    vector<pktinfo> vec;
+    vector<Protocol *> protocolVec;
     int count;
 
 private:

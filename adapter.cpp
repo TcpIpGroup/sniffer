@@ -5,6 +5,7 @@ Adapter::Adapter(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Adapter)
 {
+    setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
     ui->setupUi(this);
     device = Device::instance();
 

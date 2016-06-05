@@ -20,7 +20,7 @@ Sniffer::Sniffer(QWidget *parent) :
     setTableViewHeader();
     setTreeViewHeader();
     packageObject = new PackageObject();
-    connect(packageObject, SIGNAL(package(const pcap_pkthdr*,const u_char*)), this, SLOT(on_package(const pcap_pkthdr*,const u_char*)));
+    connect(packageObject, SIGNAL(ethernet_protocol_package(const pcap_pkthdr*,const u_char*)), this, SLOT(on_ethernet_protocol_package(const pcap_pkthdr*,const u_char*)));
     count=0;
 }
 
@@ -41,11 +41,12 @@ void Sniffer::on_actionSelectAdapter_triggered()
 
 void Sniffer::on_actionStart_triggered()
 {
-    ui->tableViewPackage->horizontalHeader()->show();
     setStartEnabled(false);
     setPauseEnabled(true);
     QStandardItemModel *model = (QStandardItemModel *)(ui->tableViewPackage->model());
     model->removeRows(0, model->rowCount());
+    protocolVec.clear();
+    Statistics::instance()->resetCount();
     packageObject->start();
 }
 
@@ -66,36 +67,28 @@ void Sniffer::on_actionExit_triggered()
     this->close();
 }
 
+void Sniffer::on_actionView_triggered() {
+    Count count;
+    count.exec();
+}
+
 void Sniffer::on_adapter_itemClicked(const QString &name)
 {
-    statusBar()->showMessage(tr("已选择设备: ") + Device::instance()->getDescriptionByName(name));
+    statusBar()->showMessage(tr("Selected device: ") + Device::instance()->getDescriptionByName(name));
     packageObject->setDeviceName(name);
     this->setStartEnabled(true);
 }
 
-void Sniffer::on_package(const pcap_pkthdr *header, const u_char *packageData)
+void Sniffer::on_ethernet_protocol_package(const pcap_pkthdr *header, const u_char *packageData)
 {
-    struct tm *ltime;
-    char timestr[16];
-    time_t local_tv_sec;
-    pktinfo pkt(packageData);
-    this->vec.push_back(pkt);
-    count++;
-    /* 将时间戳转换成可识别的格式 */
-    local_tv_sec = header->ts.tv_sec;
-    ltime=localtime(&local_tv_sec);
-    strftime( timestr, sizeof timestr, "%H:%M:%S", ltime);
-
-    //ethhdr * p=(ethhdr *)packageData;
-    //u_short test=ntohs(p->type);
-    //qDebug()<<hex<<p->dest[0]<<":"<<p->dest[1]<<":"<<p->dest[2]<<":"<<p->dest[3]<<":"<<p->dest[4]<<":"<<p->dest[5];
-    QStandardItem *item0=new QStandardItem(QString::number(count));
-    QStandardItem *item1=new QStandardItem(timestr);
-    QStandardItem *item2=new QStandardItem(QString::number(header->ts.tv_usec));
-    QStandardItem *item3=new QStandardItem(QString::number(header->len));
+    Protocol *protocol = (new Ethernet())->analyse(header, packageData);
+    this->protocolVec.push_back(protocol);
+    Statistics::instance()->increase(protocol->type);
+    QStringList briefs = protocol->briefInfo();
     QList<QStandardItem*> item;
-    item<<item0<<item1<<item2<<item3;
-    qDebug()<<"Sniffer:"<<QThread::currentThreadId();
+    for (QStringList::Iterator it = briefs.begin(); it != briefs.end(); ++it) {
+        item.append(new QStandardItem(*it));
+    }
     ((QStandardItemModel *)(ui->tableViewPackage->model()))->appendRow(item);
 }
 
@@ -123,12 +116,15 @@ void Sniffer::setTableViewHeader()
     QStandardItemModel *model = new QStandardItemModel();
     //列
     QStringList headerList;
-    headerList << "seq"<<"time" << "usec" << "head";
+    headerList << "No."<<"Source" << "Destination" << "Length" << "Protocol";
     model->setHorizontalHeaderLabels(headerList);
     ui->tableViewPackage->horizontalHeader()->setStretchLastSection(true);
+    ui->tableViewPackage->setSelectionBehavior(QTableView::SelectRows);
+    ui->tableViewPackage->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->tableViewPackage->resizeColumnsToContents();
+    ui->tableViewPackage->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
     ui->tableViewPackage->setModel(model);
     ui->tableViewPackage->verticalHeader()->hide();
-    ui->tableViewPackage->horizontalHeader()->hide();
 
     //设置选中时为整行选中
     ui->tableViewPackage->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -138,41 +134,26 @@ void Sniffer::setTableViewHeader()
 
 void Sniffer::setTreeViewHeader()
 {
-    QStandardItemModel *model = new QStandardItemModel();
-    //列
-    QStringList headerList;
-    headerList << "content";
-    model->setHorizontalHeaderLabels(headerList);
-    //ui->treeView->horizontalHeader()->setStretchLastSection(true);
-    ui->treeView->setModel(model);
-    //u//i->treeView->verticalHeader()->hide();
-    //ui->treeView->horizontalHeader()->hide();
+    ui->treeView->setHeaderHidden(true);
+    ui->treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 void Sniffer::on_tableViewPackage_clicked(const QModelIndex &index)
 {
-    QStandardItemModel *model = (QStandardItemModel *)ui->treeView->model();
-    model->removeRows(0, model->rowCount());
-
-    if (!(QStandardItemModel *)index.model()->hasChildren(index))
-    {
-            int num=index.data().toInt();
-            model->appendRow(new QStandardItem(QString::fromStdString(this->vec[num].ethinfo)));
-            if(this->vec[num].arpinfo!="")
-                 model->appendRow(new QStandardItem(QString::fromStdString(this->vec[num].arpinfo)));
-            if(this->vec[num].ipinfo!="")
-                 model->appendRow(new QStandardItem(QString::fromStdString(this->vec[num].ipinfo)));
-            if(this->vec[num].ipv6info!="")
-                 model->appendRow(new QStandardItem(QString::fromStdString(this->vec[num].ipv6info)));
-            if(this->vec[num].tcpinfo!="")
-                 model->appendRow(new QStandardItem(QString::fromStdString(this->vec[num].tcpinfo)));
-            if(this->vec[num].udpinfo!="")
-                 model->appendRow(new QStandardItem(QString::fromStdString(this->vec[num].udpinfo)));
-            if(this->vec[num].icmpinfo!="")
-                 model->appendRow(new QStandardItem(QString::fromStdString(this->vec[num].icmpinfo)));
-
-
+    //qDebug()<<index.row()<<protocolVec.at(index.row());
+    QStandardItemModel *treeViewModel = new QStandardItemModel();
+    QList<QPair<QString, QStringList>> lists = protocolVec.at(index.row())->detailInfo();
+    for (QList<QPair<QString, QStringList>>::iterator itl = lists.begin(); itl != lists.end(); ++itl) {
+        QStandardItem *item = new QStandardItem(itl->first);
+        QStringList list = itl->second;
+        QList<QStandardItem *> items;
+        for (QStringList::iterator it = list.begin(); it != list.end(); ++it) {
+            items.push_back(new QStandardItem(*it));
+        }
+        item->appendRows(items);
+        treeViewModel->appendRow(item);
     }
-
+    ui->treeView->setModel(treeViewModel);
+    ui->treeView->expandAll();
 }
 

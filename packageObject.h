@@ -39,7 +39,7 @@ signals:
      * @param header
      * @param packageData
      */
-    void package(const struct pcap_pkthdr *header, const u_char *packageData);
+    void ethernet_protocol_package(const pcap_pkthdr *header, const u_char *packageData);
 };
 
 #endif // PACKAGETHREAD_H
