@@ -5,7 +5,7 @@
 win7 + Qt Creator + winpcap库
 winpcap配置见：http://www.cnblogs.com/jecyhw/p/5290700.html
 如果要在其他操作系统下运行,可能还需要修改.pro工程配置文件修改链接外部库的格式，不然可能会报找不到lib的错。
-可能有用的参考链接：http://www.qtcentre.org/threads/32920-Using-external-libraries和http://stackoverflow.com/questions/718447/adding-external-library-into-qt-creator-project
+可能有用的参考链接：http://www.qtcentre.org/threads/32920-Using-external-libraries 和 http://stackoverflow.com/questions/718447/adding-external-library-into-qt-creator-project
 ##界面类
 1. 主界面:Sniffer类
 2. 适配器选择界面:Adapter类
