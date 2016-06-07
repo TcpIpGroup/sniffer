@@ -11,7 +11,7 @@ winpcap配置见：http://www.cnblogs.com/jecyhw/p/5290700.html
 ##界面类
 1. 主界面:Sniffer类
 2. 适配器选择界面:Adapter类
-3. 统计界面:Count列
+3. 统计界面:Count类
 
 ##协议类
 Protocol类是所有协议类的基类
